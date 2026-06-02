@@ -59,7 +59,7 @@
 
 <body>
 
-<h2>💖 SawaLeef Platform</h2>
+<h2>💖 Girl Platform</h2>
 
 <div id="loginBox">
   <input id="name" placeholder="Your Name" />
@@ -88,7 +88,23 @@
 </div>
 
 <script src="/socket.io/socket.io.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <script>
+  const firebaseConfig = {
+  apiKey: "AIzaSyB1jplP_oGZcsmVU8KN_C4PFovvvQwcaU0",
+  authDomain: "girl-platform.firebaseapp.com",
+  projectId: "girl-platform",
+  storageBucket: "girl-platform.firebasestorage.app",
+  messagingSenderId: "917243841420",
+  appId: "1:917243841420:web:dce4451bbabf93458da4a9"
+};
+
+firebase.initializeApp(firebaseConfig);
+
+const auth = firebase.auth();
+const db = firebase.firestore();
   const socket = io();
 
   let replyTo = null;
@@ -151,19 +167,24 @@
       : "";
 
     if (data.type === "file") {
-      li.innerHTML = `
-        <b>${admin}</b><br>
-        📎 <a href="${data.text}" download="${data.file}">
-          ${data.file}
-        </a>
-      `;
-    } else {
-      li.innerHTML = `
-        <b>${admin}</b><br>
-        ${replyHTML}
-        ${data.text}
-      `;
-    }
+
+  const isImage = data.file && data.file.match(/\.(jpg|jpeg|png|gif)$/i);
+
+  if (isImage) {
+    li.innerHTML = `
+      <b>${admin}</b><br>
+      <img src="${data.text}" style="max-width:200px;border-radius:10px;margin-top:5px;">
+    `;
+  } else {
+    li.innerHTML = `
+      <b>${admin}</b><br>
+      📎 <a href="${data.text}" download="${data.file}">
+        ${data.file}
+      </a>
+    `;
+  }
+
+}
 
     li.onclick = () => {
       replyTo = data.text;
