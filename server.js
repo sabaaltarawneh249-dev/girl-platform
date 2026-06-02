@@ -1,9 +1,15 @@
 const express = require("express");
+const cors = require("cors");
 const path = require("path");
 const http = require("http");
 const { Server } = require("socket.io");
 
 const app = express();
+
+app.use(cors({
+  origin: "https://girl-platform.netlify.app"
+}));
+
 const server = http.createServer(app);
 
 const io = new Server(server, {
@@ -14,6 +20,9 @@ const io = new Server(server, {
 });
 
 app.use(express.static(path.join(__dirname, "public")));
+app.get("/", (req, res) => {
+  res.send("Server is working!");
+});
 
 let users = {};
 
