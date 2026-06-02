@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Admin Panel</title>
+  <style>
+    body{
+      font-family: Arial;
+      background:#ffe6f0;
+      padding:20px;
+    }
+
+    .box{
+      background:white;
+      padding:15px;
+      border-radius:15px;
+      margin-bottom:15px;
+    }
+
+    button{
+      background:#ff4da6;
+      color:white;
+      border:none;
+      padding:10px;
+      border-radius:10px;
+      cursor:pointer;
+    }
+  </style>
+</head>
+<body>
+
+<h1>👑 Admin Panel</h1>
+
+<div class="box">
+  <h3>🟢 Online Users</h3>
+  <ul id="users"></ul>
+</div>
+
+<div class="box">
+  <h3>📢 Announcement</h3>
+
+  <input id="announcement"
+         placeholder="Write announcement">
+
+  <button onclick="sendAnnouncement()">
+    Send
+  </button>
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+
+<script>
+const socket = io();
+
+function sendAnnouncement(){
+
+  const text =
+    document.getElementById("announcement").value;
+
+  socket.emit("announcement", text);
+}
+
+socket.on("users list",(users)=>{
+
+  const ul = document.getElementById("users");
+
+  ul.innerHTML="";
+
+  users.forEach(user=>{
+
+    const li = document.createElement("li");
+
+    li.textContent =
+      user.name + " (" + user.room + ")";
+
+    ul.appendChild(li);
+
+  });
+
+});
+</script>
+
+</body>
+</html>

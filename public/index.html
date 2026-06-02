@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>SawaLeef Platform</title>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial;
+      background: linear-gradient(135deg, #ffe6f0, #ffc2d1);
+      text-align: center;
+    }
+
+    h2 {
+      color: #d63384;
+    }
+
+    #chatBox {
+      display: none;
+    }
+
+    #messages {
+      list-style: none;
+      padding: 0;
+      width: 60%;
+      margin: auto;
+    }
+
+    #messages li {
+      background: white;
+      margin: 8px;
+      padding: 10px;
+      border-radius: 12px;
+      text-align: left;
+      cursor: pointer;
+    }
+
+    input, select {
+      padding: 10px;
+      border-radius: 10px;
+      border: none;
+      margin: 5px;
+    }
+
+    button {
+      padding: 10px 15px;
+      border: none;
+      border-radius: 10px;
+      background: #ff4da6;
+      color: white;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #e60073;
+    }
+  </style>
+</head>
+
+<body>
+
+<h2>💖 SawaLeef Platform</h2>
+
+<div id="loginBox">
+  <input id="name" placeholder="Your Name" />
+  <select id="room">
+    <option value="beginner">Beginner</option>
+    <option value="intermediate">Intermediate</option>
+    <option value="advanced">Advanced</option>
+  </select>
+  <button onclick="join()">Join</button>
+</div>
+
+<div id="chatBox">
+
+<h3 id="roomTitle"></h3>
+
+<ul id="messages"></ul>
+
+<input id="input" placeholder="Type message..." />
+<button onclick="send()">Send</button>
+
+<br><br>
+
+<input type="file" id="file" />
+<button onclick="sendFile()">Send File</button>
+
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+  const socket = io();
+
+  let replyTo = null;
+  let userData = {};
+
+  const messages = document.getElementById("messages");
+  const input = document.getElementById("input");
+
+  function join() {
+    userData = {
+      name: document.getElementById("name").value || "Anonymous",
+      room: document.getElementById("room").value
+    };
+
+    socket.emit("join", userData);
+
+    document.getElementById("loginBox").style.display = "none";
+    document.getElementById("chatBox").style.display = "block";
+
+    document.getElementById("roomTitle").innerText =
+      "Room: " + userData.room;
+  }
+
+  function send() {
+    if (input.value.trim() === "") return;
+
+    socket.emit("chat message", {
+      text: input.value,
+      replyTo: replyTo
+    });
+
+    input.value = "";
+    replyTo = null;
+  }
+
+  function sendFile() {
+    const file = document.getElementById("file").files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+
+    reader.onload = function () {
+      socket.emit("chat message", {
+        text: reader.result,
+        type: "file",
+        file: file.name
+      });
+    };
+
+    reader.readAsDataURL(file);
+  }
+
+  socket.on("chat message", (data) => {
+    const li = document.createElement("li");
+
+    let admin = data.isAdmin ? "👑 ADMIN" : data.name;
+
+    let replyHTML = data.replyTo
+      ? `<div style="color:gray;font-size:12px">↳ ${data.replyTo}</div>`
+      : "";
+
+    if (data.type === "file") {
+      li.innerHTML = `
+        <b>${admin}</b><br>
+        📎 <a href="${data.text}" download="${data.file}">
+          ${data.file}
+        </a>
+      `;
+    } else {
+      li.innerHTML = `
+        <b>${admin}</b><br>
+        ${replyHTML}
+        ${data.text}
+      `;
+    }
+
+    li.onclick = () => {
+      replyTo = data.text;
+      input.placeholder = "Replying to: " + data.text;
+    };
+
+    messages.appendChild(li);
+  });
+</script>
+
+</body>
+</html>
