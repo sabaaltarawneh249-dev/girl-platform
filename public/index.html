@@ -113,20 +113,22 @@ const db = firebase.firestore();
   const messages = document.getElementById("messages");
   const input = document.getElementById("input");
 
-  function join() {
-    userData = {
-      name: document.getElementById("name").value || "Anonymous",
-      room: document.getElementById("room").value
-    };
+ function join() {
+  alert("Join button clicked");
 
-    socket.emit("join", userData);
+  userData = {
+    name: document.getElementById("name").value || "Anonymous",
+    room: document.getElementById("room").value
+  };
 
-    document.getElementById("loginBox").style.display = "none";
-    document.getElementById("chatBox").style.display = "block";
+  socket.emit("join", userData);
 
-    document.getElementById("roomTitle").innerText =
-      "Room: " + userData.room;
-  }
+  document.getElementById("loginBox").style.display = "none";
+  document.getElementById("chatBox").style.display = "block";
+
+  document.getElementById("roomTitle").innerText =
+    "Room: " + userData.room;
+}}
 
   function send() {
     if (input.value.trim() === "") return;
